@@ -1,0 +1,20 @@
+---
+- name : Installing containerRunTime, kubeadm, kubelet and kubectl
+  hosts: k8scluster
+  roles:
+    - containerRunTime
+    - k8sComponents
+  tags: initialConfig
+
+- name: Load balancer configuration
+  hosts: k8slb
+  roles:
+    - nginxLB
+  tags: LoadbalancerConfig 
+  
+- name: Initialize Kubernetes Cluster
+  hosts: k8scluster
+  roles:
+    - initCluster
+  tags: initCluster 
+...

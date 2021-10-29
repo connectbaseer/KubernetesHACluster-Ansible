@@ -1,0 +1,162 @@
+---
+# tasks file for initCluster
+
+#################################################### Init MAster Node ###################################################
+
+- name: Initialize the Kubernetes cluster using kubeadm
+  command: kubeadm init --control-plane-endpoint "k8s-lb:6443" --upload-certs --pod-network-cidr 10.244.0.0/16 --apiserver-advertise-address="{{ k8smaster1 }}"
+  become: true
+  when: ansible_hostname == 'k8s-master-01'
+
+- name: Setup kubeconfig for vagrant user
+  command: "{{ item }}"
+  with_items:
+     - mkdir -p /home/vagrant/.kube
+     - cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+     - chown vagrant:vagrant /home/vagrant/.kube/config
+  when: ansible_hostname == 'k8s-master-01'
+  become: true
+  
+################################################# Join master node 2  #####################################################
+- name : Generate new Certs for Control Plane 2
+  command: kubeadm init phase upload-certs --upload-certs
+  become: true
+  register: newCerts
+  when: ansible_hostname == 'k8s-master-01'
+
+- name: Generate new Join Command for Control Plane 2
+  command: kubeadm token create --certificate-key "{{ newCerts.stdout_lines[-1] }}"  --print-join-command
+  become: true
+  when: ansible_hostname == 'k8s-master-01'
+  register: newCPJoinCommand2
+
+- local_action: copy content={{ newCPJoinCommand2.stdout }} dest=joinFiles/newCPJoinCommand2.sh
+  when: ansible_hostname == 'k8s-master-01'
+
+- name: Copy Join Script to Control Plane 2
+  copy:
+    src: ./joinFiles/newCPJoinCommand2.sh
+    dest: /tmp
+    mode: '777'
+  when: ansible_hostname == 'k8s-master-02'
+
+- name: Append API apiserver-advertise-address
+  command: sed 's/$/ --apiserver-advertise-address={{ k8smaster2 }}/' /tmp/newCPJoinCommand2.sh
+  when: ansible_hostname == 'k8s-master-02'
+  register: newCP2JoinCommand
+
+- local_action: copy content={{ newCP2JoinCommand.stdout }} dest=joinFiles/newCP2JoinCommand.sh
+  when: ansible_hostname == 'k8s-master-02'
+
+- name: Copy Join Script to Control Plane 2
+  copy:
+    src: ./joinFiles/newCP2JoinCommand.sh
+    dest: /tmp
+    mode: '777'
+  when: ansible_hostname == 'k8s-master-02'
+
+- name: Join Control Plane node 2
+  command: sh /tmp/newCP2JoinCommand.sh
+  become: true
+  when: ansible_hostname == 'k8s-master-02'
+
+############################################### JOIN MASTER NODE 3 ####################################################
+
+- name : Generate new Certs for Control Plane 3
+  command: kubeadm init phase upload-certs --upload-certs
+  become: true
+  register: newCerts2
+  when: ansible_hostname == 'k8s-master-01'
+
+- name: Generate new Join Command Control Plane 3
+  command: kubeadm token create --certificate-key "{{ newCerts2.stdout_lines[-1] }}"  --print-join-command
+  become: true
+  when: ansible_hostname == 'k8s-master-01'
+  register: newCPJoinCommand3
+
+- local_action: copy content={{ newCPJoinCommand3.stdout }} dest=joinFiles/newCPJoinCommand3.sh
+  when: ansible_hostname == 'k8s-master-01'
+
+- name: Copy Join Script to Control Plane 3
+  copy:
+    src: ./joinFiles/newCPJoinCommand3.sh
+    dest: /tmp
+    mode: '777'
+  when: ansible_hostname == 'k8s-master-03'
+
+
+- name: Append API apiserver-advertise-address
+  command: sed 's/$/ --apiserver-advertise-address={{ k8smaster3 }}/' /tmp/newCPJoinCommand3.sh
+  when: ansible_hostname == 'k8s-master-03'
+  register: newCP3JoinCommand
+
+- local_action: copy content={{ newCP3JoinCommand.stdout }} dest=joinFiles/newCP3JoinCommand.sh
+  when: ansible_hostname == 'k8s-master-03'
+
+- name: Copy Join Script to Control Plane 3
+  copy:
+    src: ./joinFiles/newCP3JoinCommand.sh
+    dest: /tmp
+    mode: '777'
+  when: ansible_hostname == 'k8s-master-03'
+
+- name: Join Control Control Plane 3
+  command: sh /tmp/newCP3JoinCommand.sh
+  become: true
+  when: ansible_hostname == 'k8s-master-03'
+
+
+############################################### CREATE POD NETWORKING ####################################################
+
+- name: Create Pod Networking
+  become: false
+  shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+  environment:
+    KUBECONFIG: /home/vagrant/.kube/config
+  when: ansible_hostname == 'k8s-master-01'
+
+
+############################################### JOIN WORKER NODES ####################################################
+
+- name: Generate new Join Command for worker node 
+  command: kubeadm token create --print-join-command
+  become: true
+  when: ansible_hostname == 'k8s-master-01'
+  register: newWKJoinCommand
+
+- local_action: copy content={{ newWKJoinCommand.stdout }} dest=joinFiles/newWKJoinCommand.sh
+  when: ansible_hostname == 'k8s-master-01'
+  tags: initmaster1
+  
+- name: Copy Join Script to Worker Node 1
+  copy:
+    src: ./joinFiles/newWKJoinCommand.sh
+    dest: /tmp
+    mode: '777'
+  when: ansible_hostname == 'k8s-worker-01'
+  
+- name: Copy Join Script to Worker Node 2
+  copy:
+    src: ./joinFiles/newWKJoinCommand.sh
+    dest: /tmp
+    mode: '777'
+  when: ansible_hostname == 'k8s-worker-02'
+
+- name: Join worker node - 1
+  command: sh /tmp/newWKJoinCommand.sh
+  become: true
+  when: ansible_hostname == 'k8s-worker-01'
+
+- name: Join worker node - 2
+  command: sh /tmp/newWKJoinCommand.sh
+  become: true
+  when: ansible_hostname == 'k8s-worker-02'
+
+############################################### CREATE INGRESS CONTROLLER ####################################################
+- name: Install ingress controller
+  become: false
+  shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.3/deploy/static/provider/baremetal/deploy.yaml
+  environment:
+    KUBECONFIG: /home/vagrant/.kube/config
+  when: ansible_hostname == 'k8s-master-01'
+

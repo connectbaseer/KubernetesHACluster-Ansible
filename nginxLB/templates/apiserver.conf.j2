@@ -1,0 +1,11 @@
+stream {
+        upstream apiserver_read {
+             server {{ k8smaster1 }}:6443;                  
+             server {{ k8smaster2 }}:6443;
+             server {{ k8smaster3 }}:6443;                     
+        }
+        server {
+                listen 6443;                              
+                proxy_pass apiserver_read;
+        }
+}

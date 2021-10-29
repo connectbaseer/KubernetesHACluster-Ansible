@@ -1,0 +1,4 @@
+---
+# handlers file for k8sComponents
+- name : KubeletRestart
+  command: systemctl enable --now kubelet

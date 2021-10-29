@@ -1,0 +1,7 @@
+---
+ansible_user: vagrant
+ansible_become: true
+k8smaster1: 192.168.30.5
+k8smaster2: 192.168.30.6
+k8smaster3: 192.168.30.7
+...

@@ -1,0 +1,24 @@
+---
+# tasks file for k8sComponents
+- name : Add Kubernetes repository
+  copy:
+    src: files/kubernetes.repo
+    dest: /etc/yum.repos.d/kubernetes.repo
+    force: no
+    mode: '311'
+  
+- name : Set SELinux in permissive mode
+  command: "{{ item }}"
+  with_items:
+    - setenforce 0
+    - sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+- name : Installing kubeadm, kubelet and kubectl
+  yum:
+    name: 
+      - kubelet 
+      - kubeadm 
+      - kubectl 
+    disable_excludes : kubernetes
+    state: present
+  notify: KubeletRestart

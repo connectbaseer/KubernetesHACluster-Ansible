@@ -1,0 +1,48 @@
+---
+# tasks file for nginxLB
+- name: Install epel
+  yum:
+    name: 
+      - epel-release
+    state: present
+
+- name: Install nginx
+  yum:
+    name: 
+      - nginx
+      - nginx-mod-stream.x86_64
+    state: present
+
+- name: Disable SELinux
+  ansible.posix.selinux:
+    state: disabled
+
+- name : Restart nginx
+  command: systemctl start nginx
+
+- name : enable nginx on restart
+  command: systemctl enable nginx
+
+- name : Create directory for loadbalancing config.
+  file:
+    dest: /etc/nginx/tcp.conf.d
+    state: directory
+
+    
+
+- name: Add directory path to the nginx config file /etc/nginx/nginx.conf
+  ansible.builtin.lineinfile:
+    path: /etc/nginx/nginx.conf
+    insertafter: EOF
+    line: "{{ item }}"
+    state: present
+  with_items:
+    - "# including directory for tcp load balancing"
+    - include /etc/nginx/tcp.conf.d/*.conf;
+    
+
+- name: Create config for api-server loadbalancing
+  template:
+    src: apiserver.conf.j2
+    dest: /etc/nginx/tcp.conf.d/apiserver.conf
+  notify: RestartNginx

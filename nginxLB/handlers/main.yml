@@ -1,0 +1,4 @@
+---
+# handlers file for nginxLB
+- name : RestartNginx
+  command: nginx -s reload
