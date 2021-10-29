@@ -10,7 +10,15 @@ VMs are cofigured using Vagrant
 
 Vagrant Code for creating the VMS as per the above is available here : https://github.com/connectbaseer/KubernetesHACluster-Vagrant.git 
 
-IF you have configured the VMs using my vagrant project mentioned above without changing any details then you dont need to change anything. you can just enable passwordless ssh from your Ansible machine to the Kubernetes cluster VMs.
+IF you have configured the VMs using my vagrant project mentioned above without changing any details then you dont need to change anything. you can just enable password less ssh from your Ansible machine to the Kubernetes cluster VMs.
+
+Note: before running the playbook create empty folder named joinFiles in the 
+
+To tun the playbook : 
+
+```
+ansible-playbook k8s-config-playbook.yaml
+```
 
 If you have not setup the VMs using the above then you ned to make the changes accordingly in below files
 
@@ -20,17 +28,20 @@ KubernetesHACluster-Ansible/group_vars/k8scluster
 
 Change the ip Addresses Accordingly: 
 
+```
 k8smaster1: 192.168.30.5
 k8smaster2: 192.168.30.6
 k8smaster3: 192.168.30.7
 k8sworker1: 192.168.30.10
 k8sworker2: 192.168.30.11
-
+```
 File 2 : 
 
 KubernetesHACluster-Ansible/group_vars/k8slb 
 
 Change the ip Addresses Accordingly: 
+
+```
 ---
 ansible_user: vagrant
 ansible_become: true
@@ -38,6 +49,7 @@ k8smaster1: 192.168.30.5
 k8smaster2: 192.168.30.6
 k8smaster3: 192.168.30.7
 ...
+```
 
 File 3 
 
@@ -45,6 +57,7 @@ KubernetesHACluster-Ansible/hosts
 
 change the hostnames of the Kubernetes Cluster VMs
 
+```
 [control]
 mydevmachine # Ansible VM hostname 
 
@@ -63,3 +76,4 @@ k8s-worker-02  # K8s worker 02 hostname
 [k8scluster:children]
 k8smaster
 k8sworker
+```
