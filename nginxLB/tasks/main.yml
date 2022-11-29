@@ -31,7 +31,7 @@
     
 
 - name: Add directory path to the nginx config file /etc/nginx/nginx.conf
-  ansible.builtin.lineinfile:
+  lineinfile:
     path: /etc/nginx/nginx.conf
     insertafter: EOF
     line: "{{ item }}"

@@ -16,6 +16,13 @@
      - chown vagrant:vagrant /home/vagrant/.kube/config
   when: ansible_hostname == k8smaster1hostname
   become: true
+
+- name: Create dictory to hold join scripts
+  file:
+    path: ./joinFiles
+    state: directory
+  delegate_to: localhost
+  tags: create_join_directory
   
 ################################################# Join master node 2  #####################################################
 - name : Generate new Certs for Control Plane 2
