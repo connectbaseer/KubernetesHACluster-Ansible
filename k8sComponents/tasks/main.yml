@@ -21,4 +21,8 @@
       - kubectl 
     disable_excludes : kubernetes
     state: present
+
+- name : Start 
+  shell: |
+    sudo systemctl start kubelet
   notify: KubeletRestart

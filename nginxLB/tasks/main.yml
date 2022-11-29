@@ -14,7 +14,7 @@
     state: present
 
 - name: Disable SELinux
-  ansible.posix.selinux:
+  selinux:
     state: disabled
 
 - name : Restart nginx

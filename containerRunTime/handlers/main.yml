@@ -4,5 +4,5 @@
   command: "{{ item }}"
   with_items:
    - systemctl daemon-reload
-   - systemctl restart docker
-   - systemctl enable docker
+   - systemctl restart containerd
+   - systemctl enable containerd
