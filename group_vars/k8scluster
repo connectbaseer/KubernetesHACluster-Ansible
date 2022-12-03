@@ -3,8 +3,8 @@ k8smaster2: 192.168.30.6
 k8smaster3: 192.168.30.7
 k8sworker1: 192.168.30.10
 k8sworker2: 192.168.30.11
-k8smaster1hostname: k8s-master-new-01
-k8smaster2hostname: k8s-master-new-02
-k8smaster3hostname: k8s-master-new-03
-k8sworker1hostname: k8s-worker-new-01
-k8sworker2hostname: k8s-worker-new-02
+k8smaster1hostname: k8s-master-01
+k8smaster2hostname: k8s-master-02
+k8smaster3hostname: k8s-master-03
+k8sworker1hostname: k8s-worker-01
+k8sworker2hostname: k8s-worker-02

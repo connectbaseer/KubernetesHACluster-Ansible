@@ -2,16 +2,16 @@
 mydevmachine
 
 [k8slb]
-k8s-lb-new
+k8s-lb
 
 [k8smaster]
-k8s-master-new-01
-k8s-master-new-02
-k8s-master-new-03
+k8s-master-01
+k8s-master-02
+k8s-master-03
 
 [k8sworker]
-k8s-worker-new-01
-k8s-worker-new-02
+k8s-worker-01
+k8s-worker-02
 
 [k8scluster:children]
 k8smaster
