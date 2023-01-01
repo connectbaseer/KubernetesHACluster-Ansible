@@ -1,0 +1,1 @@
+kubeadm join k8s-lb:6443 --token 9xs03s.c8t5lh91gdhsam11 --discovery-token-ca-cert-hash sha256:3cb8665d4d8a72fa1db8e7769d0f36004222e92381c6c1d7457a8417352c318e 

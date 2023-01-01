@@ -1,0 +1,1 @@
+kubeadm join k8s-lb:6443 --token 4z2tbk.tgqsov17sj0far6m --discovery-token-ca-cert-hash sha256:3cb8665d4d8a72fa1db8e7769d0f36004222e92381c6c1d7457a8417352c318e --control-plane --certificate-key 90c08b635a322d9040a6680da03fb4b6420d912beb0dee94dfe23dc0050e50b3
